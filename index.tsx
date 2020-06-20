@@ -1,98 +1,63 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import {
-  CssBaseline,
-  createMuiTheme,
-  AppBar,
-  Tabs,
-  Tab, Collapse
-} from "@material-ui/core";
-import {
-  ThemeProvider,
-  Theme,
-  makeStyles,
-  createStyles
-} from "@material-ui/core/styles"; //IMPORTANT: do not use @material-ui/styles !!
-import { Impressum, ImpressumToggle } from "./Impressum";
-import AddIcon from "@material-ui/icons/Add";
-import ListIcon from "@material-ui/icons/List";
-import EditIcon from "@material-ui/icons/Edit";
-import { red, grey } from "@material-ui/core/colors";
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
+import { BrowserRouter, Route, Switch as RouteSwitch } from 'react-router-dom';
 
-const myTheme = createMuiTheme({
+import { createMuiTheme, CssBaseline, ThemeProvider } from '@material-ui/core';
+
+import { App as AdminApp } from './components/admin/App';
+import { App as GuestApp } from './components/guest/App';
+import { DevControls } from './components/snippets/DevControls';
+import { App as UserApp } from './components/user/App';
+
+const theme = createMuiTheme({
   palette: {
-    type: "dark",
-    primary: red,
-    secondary: grey
-  }
+    primary: {
+      main: "#dcedc8",
+      light: "#fffffb",
+      dark: "#aabb97",
+      contrastText: "#000000",
+    },
+    secondary: {
+      main: "#d9c8ed",
+      light: "#fffbff",
+      dark: "#a797bb",
+      contrastText: "#000000",
+    },
+  },
+  typography: {
+    fontFamily: `"Raleway", sans-serif`,
+    fontSize: 17,
+    fontWeightLight: 200,
+    fontWeightRegular: 300,
+    fontWeightMedium: 300,
+  },
 });
 
-const useStyles = makeStyles((_theme: Theme) =>
-  createStyles({
-    main: {
-      display: "flex",
-      justifyContent: "center",
-      overflow: "auto",
-    },
-    spacerDiv: {
-      height: "100%",
-    }
-  })
-);
-
-enum RenderPage {
-  LIST,
-  ADD,
-  EDIT
-}
-
 function App() {
-  const classes = useStyles(myTheme);
-
-  const [renderPage, setRenderPage] = React.useState<RenderPage>(
-    RenderPage.ADD
-  );
-  const [impressum, setImpressum] = React.useState<boolean>(false);
-
-  const handleChange = (
-    _event: React.ChangeEvent<{}>,
-    newValue: RenderPage
-  ) => {
-    setRenderPage(newValue);
-  };
-
-  const handleImpressum = () => setImpressum((prevState => !prevState));
-
-  function Content() {
-    switch (renderPage) {
-      case RenderPage.LIST:
-        return null;
-      case RenderPage.ADD:
-        return null;
-      case RenderPage.EDIT:
-        return null;
-      default:
-        console.error("Default case reached");
-        return null;
-    }
-  }
+  // this value gets defined by an api call
+  // to the backend.
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [dev] = useState<boolean>(true);
 
   return (
-    <div>
-      <ThemeProvider theme={myTheme}>
-        <Collapse in={!impressum}>
+    <div style={{ overflowX: "hidden" }}>
+      <BrowserRouter>
+        <ThemeProvider theme={theme}>
           <CssBaseline />
-          <main className={classes.main}>
-            <Content />
-          </main>
-        </Collapse>
-        {ImpressumToggle(handleImpressum)}
-        <Collapse in={impressum}>
-          <Impressum />
-        </Collapse>
-      </ThemeProvider>
+          <RouteSwitch>
+            <Route path="/admin" component={AdminApp} />
+            <Route path="/" component={isLoggedIn ? UserApp : GuestApp} />
+          </RouteSwitch>
+          {dev && (
+            <DevControls
+              isLoggedIn={isLoggedIn}
+              setIsLoggedIn={setIsLoggedIn}
+            />
+          )}
+        </ThemeProvider>
+      </BrowserRouter>
     </div>
   );
 }
 
-ReactDOM.render(<App />, document.querySelector("#app"));
+ReactDOM.render(<App />, document.getElementById("app"));
