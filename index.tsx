@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Route, Switch as RouteSwitch } from 'react-router-dom';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 import { createMuiTheme, CssBaseline, ThemeProvider } from '@material-ui/core';
 
 import { App as AdminApp } from './components/admin/App';
 import { App as GuestApp } from './components/guest/App';
-import { DevControls } from './components/snippets/DevControls';
 import { App as UserApp } from './components/user/App';
+import { raleway200, raleway300 } from './fonts/Fonts';
+import BackendToken, { User } from './utils/BackendAPI';
 
 const theme = createMuiTheme({
   palette: {
@@ -25,37 +26,48 @@ const theme = createMuiTheme({
     },
   },
   typography: {
-    fontFamily: `"Raleway", sans-serif`,
+    fontFamily: "Raleway",
     fontSize: 17,
     fontWeightLight: 200,
     fontWeightRegular: 300,
     fontWeightMedium: 300,
   },
+  overrides: {
+    MuiCssBaseline: {
+      "@global": {
+        "@font-face": [raleway200, raleway300],
+      },
+    },
+  },
 });
 
 function App() {
-  // this value gets defined by an api call
-  // to the backend.
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [dev] = useState<boolean>(true);
+  const [render, setRender] = useState<boolean>(false);
+
+  useEffect(() => {
+    (async () => {
+      let response = (await User.getUser()).responseCode;
+      BackendToken.authenticated = response == "Ok";
+      setRender(true);
+    })();
+  }, []);
 
   return (
     <div style={{ overflowX: "hidden" }}>
-      <BrowserRouter>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <RouteSwitch>
-            <Route path="/admin" component={AdminApp} />
-            <Route path="/" component={isLoggedIn ? UserApp : GuestApp} />
-          </RouteSwitch>
-          {dev && (
-            <DevControls
-              isLoggedIn={isLoggedIn}
-              setIsLoggedIn={setIsLoggedIn}
-            />
-          )}
-        </ThemeProvider>
-      </BrowserRouter>
+      {render && (
+        <BrowserRouter>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Switch>
+              <Route path="/admin" component={AdminApp} />
+              <Route path="/welcome" component={GuestApp} />
+              <Route path="/login" component={GuestApp} />
+              <Route path="/*" component={UserApp} />
+              <Route path="*" component={() => "404 NOT FOUND"} />
+            </Switch>
+          </ThemeProvider>
+        </BrowserRouter>
+      )}
     </div>
   );
 }

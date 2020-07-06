@@ -13,20 +13,20 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
   },
   drawer: {
-    [theme.breakpoints.up("sm")]: {
+    [theme.breakpoints.up("md")]: {
       width: drawerWidth,
       flexShrink: 0,
     },
   },
   appBar: {
-    [theme.breakpoints.up("sm")]: {
+    [theme.breakpoints.up("md")]: {
       width: `calc(100% - ${drawerWidth}px)`,
       marginLeft: drawerWidth,
     },
   },
   menuButton: {
     marginRight: theme.spacing(2),
-    [theme.breakpoints.up("sm")]: {
+    [theme.breakpoints.up("md")]: {
       display: "none",
     },
   },
@@ -70,7 +70,7 @@ function TagifyAppBar(props: TagifyAppBarProps) {
     <Slide appear={false} direction="down" in={!trigger}>
       <AppBar
         position="fixed"
-        elevation={0}
+        elevation={transparent ? 0 : undefined}
         className={hasDrawer ? classes.appBar : undefined}
         style={{ background: transparent ? "transparent" : undefined }}
       >
@@ -121,7 +121,7 @@ function TagifyDrawer(props: TagifyDrawerProps) {
 
   return (
     <nav className={classes.drawer} aria-label="mailbox folders">
-      <Hidden smUp implementation="css">
+      <Hidden mdUp implementation="css">
         <SwipeableDrawer
           container={container}
           variant="temporary"
@@ -139,7 +139,7 @@ function TagifyDrawer(props: TagifyDrawerProps) {
           {children}
         </SwipeableDrawer>
       </Hidden>
-      <Hidden xsDown implementation="css">
+      <Hidden smDown implementation="css">
         <Drawer
           classes={{
             paper: classes.drawerPaper,
